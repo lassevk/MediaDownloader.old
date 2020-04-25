@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediaDownloader", "MediaDownloader\MediaDownloader.csproj", "{3CE3D61E-3ED7-47DB-962E-C282EB7BF6C1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediaDownloader.Downloader", "MediaDownloader.Downloader\MediaDownloader.Downloader.csproj", "{36E1B3E2-FEC5-4992-B223-19B0E75F2EA9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediaDownloader.Core", "MediaDownloader.Core\MediaDownloader.Core.csproj", "{38E6C278-F5D3-41F7-BD9D-AA0A56D7CA56}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3CE3D61E-3ED7-47DB-962E-C282EB7BF6C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3CE3D61E-3ED7-47DB-962E-C282EB7BF6C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3CE3D61E-3ED7-47DB-962E-C282EB7BF6C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3CE3D61E-3ED7-47DB-962E-C282EB7BF6C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36E1B3E2-FEC5-4992-B223-19B0E75F2EA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36E1B3E2-FEC5-4992-B223-19B0E75F2EA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36E1B3E2-FEC5-4992-B223-19B0E75F2EA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36E1B3E2-FEC5-4992-B223-19B0E75F2EA9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38E6C278-F5D3-41F7-BD9D-AA0A56D7CA56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38E6C278-F5D3-41F7-BD9D-AA0A56D7CA56}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38E6C278-F5D3-41F7-BD9D-AA0A56D7CA56}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38E6C278-F5D3-41F7-BD9D-AA0A56D7CA56}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

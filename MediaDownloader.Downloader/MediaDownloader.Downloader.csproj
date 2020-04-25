@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{36E1B3E2-FEC5-4992-B223-19B0E75F2EA9}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MediaDownloader.Downloader</RootNamespace>
+    <AssemblyName>MediaDownloader.Downloader</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CameraConfiguration.cs" />
+    <Compile Include="CameraDownloaderBackgroundService.cs" />
+    <Compile Include="CameraDownloaderConfiguration.cs" />
+    <Compile Include="CameraDownloadOperation.cs" />
+    <Compile Include="DriveEjector.cs" />
+    <Compile Include="IDriveEjector.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ServicesBootstrapper.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MediaDownloader.Core\MediaDownloader.Core.csproj">
+      <Project>{38e6c278-f5d3-41f7-bd9d-aa0a56d7ca56}</Project>
+      <Name>MediaDownloader.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="DryIoc.dll" Version="4.0.4" />
+    <PackageReference Include="JetBrains.Annotations" Version="2019.1.1" />
+    <PackageReference Include="LVK.Configuration" Version="2019.12.20.1623" />
+    <PackageReference Include="LVK.Core" Version="2019.12.20.1623" />
+    <PackageReference Include="LVK.Core.Services" Version="2019.12.20.1623" />
+    <PackageReference Include="LVK.DryIoc" Version="2019.12.20.1623" />
+    <PackageReference Include="LVK.Json" Version="2019.12.20.1623" />
+    <PackageReference Include="LVK.Logging" Version="2019.12.20.1623" />
+    <PackageReference Include="LVK.NodaTime" Version="2019.12.20.1623" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="NodaTime" Version="2.4.5" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+         Other similar extension points exist, see Microsoft.Common.targets.
+    <Target Name="BeforeBuild">
+    </Target>
+    <Target Name="AfterBuild">
+    </Target>
+    -->
+</Project>
