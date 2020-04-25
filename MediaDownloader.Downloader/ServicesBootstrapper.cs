@@ -11,7 +11,7 @@ namespace MediaDownloader.Downloader
         {
             container.Bootstrap<LVK.Core.Services.ServicesBootstrapper>();
 
-            container.Register<IBackgroundService, CameraDownloaderBackgroundService>();
+            container.Register<IBackgroundService, DownloaderBackgroundService>();
             container.Register<IDriveEjector, DriveEjector>();
         }
     }

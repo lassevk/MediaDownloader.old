@@ -40,12 +40,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CameraConfiguration.cs" />
-    <Compile Include="CameraDownloaderBackgroundService.cs" />
-    <Compile Include="CameraDownloaderConfiguration.cs" />
-    <Compile Include="CameraDownloadOperation.cs" />
+    <Compile Include="DownloadOperation.cs" />
+    <Compile Include="DownloaderBackgroundService.cs" />
     <Compile Include="DriveEjector.cs" />
     <Compile Include="IDriveEjector.cs" />
+    <Compile Include="MediaConfiguration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServicesBootstrapper.cs" />
   </ItemGroup>

@@ -1,4 +1,5 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -17,7 +18,7 @@ using MediaDownloader.Core;
 
 namespace MediaDownloader.Downloader
 {
-    internal class CameraDownloaderBackgroundService : IBackgroundService
+    internal class DownloaderBackgroundService : IBackgroundService
     {
         [NotNull]
         private readonly ILogger _Logger;
@@ -32,25 +33,23 @@ namespace MediaDownloader.Downloader
         private readonly ITaskProgressReporter _TaskProgressReporter;
 
         [NotNull]
-        private readonly IConfigurationElementWithDefault<CameraDownloaderConfiguration> _Configuration;
+        public IConfiguration Configuration { get; }
 
-        public CameraDownloaderBackgroundService(
-            [NotNull] IConfiguration configuration, [NotNull] ILogger logger, [NotNull] IDriveEjector driveEjector,
-            [NotNull] ITrayNotification trayNotification, [NotNull] ITaskProgressReporter taskProgressReporter)
+        [NotNull]
+        private readonly IConfigurationElementWithDefault<Dictionary<string, MediaConfiguration>> _Configuration;
+
+        public DownloaderBackgroundService([NotNull] IConfiguration configuration, [NotNull] ILogger logger,
+                                           [NotNull] IDriveEjector driveEjector,
+                                           [NotNull] ITrayNotification trayNotification, [NotNull] ITaskProgressReporter taskProgressReporter)
         {
-            if (configuration == null)
-                throw new ArgumentNullException(nameof(configuration));
-
             _Logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _DriveEjector = driveEjector ?? throw new ArgumentNullException(nameof(driveEjector));
-            _TrayNotification = trayNotification ?? throw new ArgumentNullException(nameof(trayNotification));
-            _TaskProgressReporter = taskProgressReporter ?? throw new ArgumentNullException(nameof(taskProgressReporter));
-
-            _Configuration = configuration["CameraDownload"]
-               .Element<CameraDownloaderConfiguration>()
-               .WithDefault(() => new CameraDownloaderConfiguration());
+            _DriveEjector = driveEjector;
+            _TrayNotification = trayNotification;
+            _TaskProgressReporter = taskProgressReporter;
+            Configuration = configuration;
+            _Configuration = configuration.Element<Dictionary<string, MediaConfiguration>>("Media")
+               .WithDefault(() => new Dictionary<string, MediaConfiguration>());
         }
-
         public async Task Execute(CancellationToken cancellationToken)
         {
             while (!cancellationToken.IsCancellationRequested)
@@ -62,69 +61,78 @@ namespace MediaDownloader.Downloader
 
         private async Task TryDownloadFiles(CancellationToken cancellationToken)
         {
-            using (_Logger.LogScope(LogLevel.Debug, $"{nameof(CameraDownloaderBackgroundService)}.{nameof(TryDownloadFiles)}"))
+            DriveInfo[] drives = DriveInfo.GetDrives();
+
+            using (_Logger.LogScope(LogLevel.Debug, $"{nameof(DownloaderBackgroundService)}.{nameof(TryDownloadFiles)}"))
             {
-                var configuration = _Configuration.Value();
+                Dictionary<string, MediaConfiguration> configuration = _Configuration.Value();
 
-                if (string.IsNullOrWhiteSpace(configuration.Target))
+                foreach (MediaConfiguration mediaConfiguration in configuration.Values)
                 {
-                    _Logger.LogError("CameraDownload configuration is missing Target specification");
-                    return;
-                }
-
-                var drives = DriveInfo.GetDrives();
-
-                foreach (var kvp in configuration.Cameras)
-                {
-                    string diskName = kvp.Key;
-                    CameraConfiguration cameraConfiguration = kvp.Value.NotNull();
-
-                    DriveInfo disk;
-                    try
+                    foreach (var volumeLabel in mediaConfiguration.VolumeLabels)
                     {
-                        disk = drives.FirstOrDefault(
-                            di => StringComparer.InvariantCultureIgnoreCase.Equals(di.NotNull().VolumeLabel, diskName));
+                        DriveInfo drive = drives.FirstOrDefault(
+                            di => StringComparer.InvariantCultureIgnoreCase.Equals(volumeLabel, di.VolumeLabel));
 
-                        if (disk is null)
-                            continue;
+                        if (drive != null)
+                            await TryDownloadFilesFromDrive(drive, mediaConfiguration, cancellationToken);
                     }
-                    catch (IOException)
-                    {
-                        break;
-                    }
-
-                    _Logger.LogInformation($"Disk {diskName} located at {disk.RootDirectory.FullName}");
-
-                    string source = cameraConfiguration.Source?.Replace(
-                        "{ROOT}", disk.RootDirectory.FullName.TrimEnd(Path.DirectorySeparatorChar, Path.PathSeparator));
-
-                    if (source is null)
-                    {
-                        _Logger.LogError($"CameraDownload camera configuration for {diskName} is missing Source specification");
-                        continue;
-                    }
-
-                    await DownloadFiles(source, configuration.Target, cameraConfiguration.Operation, cancellationToken);
-                    if (cameraConfiguration.Eject)
-                    {
-                        _DriveEjector.Eject(disk);
-                        _TrayNotification.Notify($"Finished downloading files from '{disk.RootDirectory.FullName}', drive ejected");
-                    }
-                    else
-                        _TrayNotification.Notify($"Finished downloading files from '{disk.RootDirectory.FullName}'");
                 }
             }
         }
 
+        private async Task TryDownloadFilesFromDrive(DriveInfo drive, MediaConfiguration mediaConfiguration, CancellationToken cancellationToken)
+        {
+            using (_Logger.LogScope(LogLevel.Debug, $"{nameof(DownloaderBackgroundService)}.{nameof(TryDownloadFilesFromDrive)}"))
+            {
+                string source = mediaConfiguration.Source?.Replace(
+                    "{ROOT}", drive.RootDirectory.FullName.TrimEnd(Path.DirectorySeparatorChar, Path.PathSeparator));
+
+                if (source is null)
+                {
+                    _Logger.LogError($"Media configuration for {drive.VolumeLabel} is missing Source specification");
+                    return;
+                }
+
+                if (mediaConfiguration.Target is null)
+                {
+                    _Logger.LogError($"Media configuration for {drive.VolumeLabel} is missing Target specification");
+                    return;
+                }
+
+                if (mediaConfiguration.Masks.Count == 0)
+                {
+                    _Logger.LogError($"Media configuration for {drive.VolumeLabel} is missing Masks specification");
+                    return;
+                }
+
+                await DownloadFiles(source, mediaConfiguration.Target, mediaConfiguration.Operation, cancellationToken, mediaConfiguration.Masks);
+                if (mediaConfiguration.Eject)
+                {
+                    await Task.Delay(5000, cancellationToken);
+                    _DriveEjector.Eject(drive);
+                    _TrayNotification.Notify($"Finished downloading files from '{drive.RootDirectory.FullName}', drive ejected");
+                }
+                else
+                    _TrayNotification.Notify($"Finished downloading files from '{drive.RootDirectory.FullName}'");
+            }
+        }
+        
         private async Task DownloadFiles(
-            [NotNull] string source, [NotNull] string targetTemplate, CameraDownloadOperation operation,
-            CancellationToken cancellationToken)
+            [NotNull] string source, [NotNull] string targetTemplate, DownloadOperation operation,
+            CancellationToken cancellationToken, IEnumerable<string> masks)
         {
             var reporter = _TaskProgressReporter.CreateTask($"Download from {source}");
             try
             {
-                string[] sourceFilePaths = Directory.GetFiles(source, "*.*", SearchOption.AllDirectories);
-                reporter.Report(sourceFilePaths.Length, 0);
+                var sourceFilePaths = new List<string>();
+                foreach (string mask in masks)
+                    sourceFilePaths.AddRange(Directory.GetFiles(source, mask, SearchOption.AllDirectories));
+
+                if (sourceFilePaths.Count == 0)
+                    return;
+                
+                reporter.Report(sourceFilePaths.Count, 0);
                 int count = 0;
                 foreach (string sourceFilePath in sourceFilePaths)
                 {
@@ -139,10 +147,10 @@ namespace MediaDownloader.Downloader
                             break;
                     }
 
-                    if (operation == CameraDownloadOperation.Move)
+                    if (operation == DownloadOperation.Move)
                         File.Delete(sourceFilePath);
 
-                    reporter.Report(sourceFilePaths.Length, ++count);
+                    reporter.Report(sourceFilePaths.Count, ++count);
                 }
             }
             finally

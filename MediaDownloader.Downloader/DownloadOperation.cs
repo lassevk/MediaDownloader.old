@@ -1,7 +1,8 @@
 namespace MediaDownloader.Downloader
 {
-    internal enum CameraDownloadOperation
+    internal enum DownloadOperation
     {
+        Unknown,
         Copy,
         Move
     }
