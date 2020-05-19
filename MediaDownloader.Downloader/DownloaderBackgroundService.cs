@@ -72,11 +72,17 @@ namespace MediaDownloader.Downloader
                 {
                     foreach (var volumeLabel in mediaConfiguration.VolumeLabels)
                     {
-                        DriveInfo drive = drives.FirstOrDefault(
-                            di => StringComparer.InvariantCultureIgnoreCase.Equals(volumeLabel, di.VolumeLabel));
-
-                        if (drive != null)
-                            await TryDownloadFilesFromDrive(drive, mediaConfiguration, cancellationToken);
+                        try
+                        {
+                            DriveInfo drive = drives.FirstOrDefault(
+                                di => StringComparer.InvariantCultureIgnoreCase.Equals(volumeLabel, di.VolumeLabel));
+                            if (drive != null)
+                                await TryDownloadFilesFromDrive(drive, mediaConfiguration, cancellationToken);
+                        }
+                        catch (IOException ex)
+                        {
+                            _Logger.LogException(ex);
+                        }
                     }
                 }
             }
